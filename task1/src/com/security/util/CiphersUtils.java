@@ -1,8 +1,11 @@
-package com.security.base64;
+package com.security.util;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
-public class Base64Utils {
+public class CiphersUtils {
     public static Map<String, Integer> BASE_64_CHART = Map.ofEntries(
             Map.entry("A", 0),
             Map.entry("B", 1),
@@ -69,5 +72,15 @@ public class Base64Utils {
             Map.entry("+", 62),
             Map.entry("/", 63),
             Map.entry("=", 64)
-            );
+    );
+
+    public static String readFromFile(final String path){
+        String data = "";
+        try {
+            data = new String(Files.readAllBytes(Paths.get(path)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
 }
