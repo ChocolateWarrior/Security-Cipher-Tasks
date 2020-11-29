@@ -1,5 +1,6 @@
-package com.security.subtask1.command;
+package com.security.util;
 
+//
 public interface ExampleCommand {
     void execute();
 }

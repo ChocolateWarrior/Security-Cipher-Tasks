@@ -1,7 +1,7 @@
 package com.security;
 
 import com.security.subtask1.command.DecipherCaesarXorExampleCommand;
-import com.security.subtask1.command.ExampleCommand;
+import com.security.util.ExampleCommand;
 
 public class Main {
 
