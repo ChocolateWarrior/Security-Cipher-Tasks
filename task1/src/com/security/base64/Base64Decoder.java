@@ -2,7 +2,8 @@ package com.security.base64;
 
 import java.util.stream.Stream;
 
-import static com.security.base64.Base64Utils.BASE_64_CHART;
+import static com.security.util.CiphersUtils.BASE_64_CHART;
+
 
 public class Base64Decoder {
     public final String decode(final String cipher) {
@@ -28,7 +29,7 @@ public class Base64Decoder {
     }
 
     private String getBinary(final Integer number) {
-        if (number == 64){
+        if (number == 64) {
             return "00";
         }
         final StringBuilder binary = new StringBuilder(Integer.toString(number, 2));
