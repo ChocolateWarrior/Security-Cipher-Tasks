@@ -39,13 +39,10 @@ public class Xor3ExampleCommand implements ExampleCommand {
     }
 
     private List<StringBuilder> appendGroupedChars(int keyLength) {
-        final StringBuilder group1 = new StringBuilder();
-        final StringBuilder group2 = new StringBuilder();
-        final StringBuilder group3 = new StringBuilder();
-        final StringBuilder group4 = new StringBuilder();
-        final StringBuilder group5 = new StringBuilder();
-        final StringBuilder group6 = new StringBuilder();
-        final List<StringBuilder> groups = List.of(group1, group2, group3, group4, group5, group6);
+        final List<StringBuilder> groups = new ArrayList<>();
+        for (int i = 0; i < keyLength; i++) {
+            groups.add(new StringBuilder());
+        }
 //        for (int groupKey = 0; groupKey < keyLength; groupKey++) {
 //            StringBuilder cipheredByMutualChar = new StringBuilder();
 //
