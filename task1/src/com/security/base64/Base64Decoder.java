@@ -2,7 +2,7 @@ package com.security.base64;
 
 import java.util.stream.Stream;
 
-import static com.security.util.CiphersUtils.BASE_64_CHART;
+import static com.security.util.Constants.BASE_64_CHART;
 
 
 public class Base64Decoder {
@@ -23,7 +23,7 @@ public class Base64Decoder {
 
     private String getBinaryStringFromCipher(String cipher) {
         return Stream.of(cipher.split(""))
-                .map(letter -> BASE_64_CHART.get(letter))
+                .map(BASE_64_CHART::get)
                 .map(this::getBinary)
                 .reduce("", (s1, s2) -> s1 + s2);
     }

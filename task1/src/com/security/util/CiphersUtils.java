@@ -3,78 +3,9 @@ package com.security.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 
 public class CiphersUtils {
-    public static Map<String, Integer> BASE_64_CHART = Map.ofEntries(
-            Map.entry("A", 0),
-            Map.entry("B", 1),
-            Map.entry("C", 2),
-            Map.entry("D", 3),
-            Map.entry("E", 4),
-            Map.entry("F", 5),
-            Map.entry("G", 6),
-            Map.entry("H", 7),
-            Map.entry("I", 8),
-            Map.entry("J", 9),
-            Map.entry("K", 10),
-            Map.entry("L", 11),
-            Map.entry("M", 12),
-            Map.entry("N", 13),
-            Map.entry("O", 14),
-            Map.entry("P", 15),
-            Map.entry("Q", 16),
-            Map.entry("R", 17),
-            Map.entry("S", 18),
-            Map.entry("T", 19),
-            Map.entry("U", 20),
-            Map.entry("V", 21),
-            Map.entry("W", 22),
-            Map.entry("X", 23),
-            Map.entry("Y", 24),
-            Map.entry("Z", 25),
-            Map.entry("a", 26),
-            Map.entry("b", 27),
-            Map.entry("c", 28),
-            Map.entry("d", 29),
-            Map.entry("e", 30),
-            Map.entry("f", 31),
-            Map.entry("g", 32),
-            Map.entry("h", 33),
-            Map.entry("i", 34),
-            Map.entry("j", 35),
-            Map.entry("k", 36),
-            Map.entry("l", 37),
-            Map.entry("m", 38),
-            Map.entry("n", 39),
-            Map.entry("o", 40),
-            Map.entry("p", 41),
-            Map.entry("q", 42),
-            Map.entry("r", 43),
-            Map.entry("s", 44),
-            Map.entry("t", 45),
-            Map.entry("u", 46),
-            Map.entry("v", 47),
-            Map.entry("w", 48),
-            Map.entry("x", 49),
-            Map.entry("y", 50),
-            Map.entry("z", 51),
-            Map.entry("0", 52),
-            Map.entry("1", 53),
-            Map.entry("2", 54),
-            Map.entry("3", 55),
-            Map.entry("4", 56),
-            Map.entry("5", 57),
-            Map.entry("6", 58),
-            Map.entry("7", 59),
-            Map.entry("8", 60),
-            Map.entry("9", 61),
-            Map.entry("+", 62),
-            Map.entry("/", 63),
-            Map.entry("=", 64)
-    );
-
-    public static String readFromFile(final String path){
+    public static String readFromFile(final String path) {
         String data = "";
         try {
             data = new String(Files.readAllBytes(Paths.get(path)));

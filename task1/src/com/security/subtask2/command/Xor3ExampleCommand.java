@@ -5,7 +5,7 @@ import com.security.util.ExampleCommand;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.security.util.Constants.*;
+import static com.security.util.Constants.SUBTASK2_CIPHERED;
 
 
 //Now try a repeating-key XOR cipher. E.g. it should take a string "hello world" and, given the key is "key",
@@ -28,28 +28,54 @@ public class Xor3ExampleCommand implements ExampleCommand {
         //Find key length
         int keyLength = findKeyLength();
         //Split into groups by key
-        List<String> groupedChars = appendGroupedChars(keyLength);
+        List<StringBuilder> groupedChars = appendGroupedChars(keyLength);
 
-        groupedChars.forEach(System.out::println);
-        //TODO: add frequency analysis
+        groupedChars.stream()
+                .peek(System.out::println)
+                .map(this::calculateFrequencyMap)
+                .forEach(System.out::println);
+        //TODO: ????
         return deciphered;
     }
 
-    private List<String> appendGroupedChars(int keyLength) {
-        List<String> groups = new ArrayList<>();
-
-        for (int groupKey = 0; groupKey < keyLength; groupKey++) {
-            StringBuilder cipheredByMutualChar = new StringBuilder();
-
-            for (int j = 0; j < SUBTASK2_CIPHERED.length(); j++) {
-
-                if (j % (keyLength + groupKey) == 0) { //TODO: revise if works properly, SUGGESTION: might miss first 6 elements
-                    cipheredByMutualChar.append(SUBTASK2_CIPHERED.charAt(j));
-                }
-            }
-            groups.add(cipheredByMutualChar.toString());
+    private List<StringBuilder> appendGroupedChars(int keyLength) {
+        final StringBuilder group1 = new StringBuilder();
+        final StringBuilder group2 = new StringBuilder();
+        final StringBuilder group3 = new StringBuilder();
+        final StringBuilder group4 = new StringBuilder();
+        final StringBuilder group5 = new StringBuilder();
+        final StringBuilder group6 = new StringBuilder();
+        final List<StringBuilder> groups = List.of(group1, group2, group3, group4, group5, group6);
+//        for (int groupKey = 0; groupKey < keyLength; groupKey++) {
+//            StringBuilder cipheredByMutualChar = new StringBuilder();
+//
+//            for (int j = 0; j < SUBTASK2_CIPHERED.length(); j++) {
+//
+//                if (j % (keyLength + groupKey) == 0) { //TODO: revise if works properly, SUGGESTION: might miss first 6 elements
+//                    cipheredByMutualChar.append(SUBTASK2_CIPHERED.charAt(j));
+//                }
+//            }
+//            groups.add(cipheredByMutualChar.toString());
+//        }
+        for (int i = 0; i < SUBTASK2_CIPHERED.length(); i++) {
+            groups.get(i % keyLength).append(SUBTASK2_CIPHERED.charAt(i));
         }
         return groups;
+    }
+
+    private Map<Character, Double> calculateFrequencyMap(final StringBuilder stringBuilder) {
+        final Map<Character, Double> frequencyMap = new HashMap<>();
+        stringBuilder.chars()
+                .forEach(letter -> {
+                    if (frequencyMap.get((char) letter) == null) {
+                        frequencyMap.put((char) letter, 1d);
+                    } else {
+                        double num = frequencyMap.get((char) letter) + 1;
+                        frequencyMap.put((char) letter, num);
+                    }
+                });
+        frequencyMap.replaceAll((k, v) -> v = v / stringBuilder.length());
+        return frequencyMap;
     }
 
     private int findKeyLength() {
