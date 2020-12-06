@@ -35,27 +35,27 @@ public class Xor3ExampleCommand implements ExampleCommand {
         //Split into groups by key
         final List<StringBuilder> groupedChars = appendGroupedChars(keyLength, cipher);
 
-        for (int i = 0; i < groupedChars.size(); i++) {
-            System.out.println(i + ": ===== " + groupedChars.get(i));
-        }
-        System.out.println("===================================");
-        groupedChars.stream()
-                .peek(g -> System.out.println("\n" + "\n" + "\n" + g))
-                .map(this::calculateFrequencyMap)
-                .peek(g -> System.out.println("size: " + g.size()))
-                .forEach(System.out::println);
-        System.out.println("=======================================");
+//        for (int i = 0; i < groupedChars.size(); i++) {
+//            System.out.println(i + ": ===== " + groupedChars.get(i));
+//        }
+//        System.out.println("===================================");
+//        groupedChars.stream()
+//                .peek(g -> System.out.println("\n" + "\n" + "\n" + g))
+//                .map(this::calculateFrequencyMap)
+//                .peek(g -> System.out.println("size: " + g.size()))
+//                .forEach(System.out::println);
+//        System.out.println("=======================================");
 
-        ENGLISH_LETTERS_FREQUENCY.keySet().forEach(potentialEncodedChar -> {
-            System.out.println(potentialEncodedChar + " ========= ");
-            groupedChars.get(0).toString().chars()
-                    .map(encoded -> (char) encoded ^ (potentialEncodedChar ^ '.'))
-                    .forEach(ch -> System.out.print(Character.toString(ch)));
-            System.out.println();
-        });
+//        ENGLISH_LETTERS_FREQUENCY.keySet().forEach(potentialEncodedChar -> {
+//            System.out.println(potentialEncodedChar + " ========= ");
+//            groupedChars.get(0).toString().chars()
+//                    .map(encoded -> (char) encoded ^ (potentialEncodedChar ^ '.'))
+//                    .forEach(ch -> System.out.print(Character.toString(ch)));
+//            System.out.println();
+//        });
 
         final String key = "" + (char) ('.' ^ 'e') + (char) ('A' ^ 'r') + (char) ('K' ^ ' ');
-        System.out.println(key);
+//        System.out.println(key);
         deciphered = decodeByKey(cipher, key);
         System.out.println(deciphered);
         return deciphered;
