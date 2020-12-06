@@ -16,9 +16,9 @@ public class Main {
         System.out.println(">>>>> Subtask1");
         ExampleCommand decipherCaesarCommand = new DecipherCaesarXorExampleCommand();
         decipherCaesarCommand.execute();
-//
-//        System.out.println(">>>>> Subtask2");
-//        ExampleCommand xor3Command = new Xor3ExampleCommand();
-//        xor3Command.execute();
+
+        System.out.println(">>>>> Subtask2");
+        ExampleCommand xor3Command = new Xor3ExampleCommand();
+        xor3Command.execute();
     }
 }
