@@ -68,6 +68,7 @@ public interface Constants {
             Map.entry('.', 23d),
             Map.entry(',', 24d),
             Map.entry('\n', 25d));
+
     Map<String, Integer> BASE_64_CHART = Map.ofEntries(
             Map.entry("A", 0),
             Map.entry("B", 1),
@@ -135,4 +136,32 @@ public interface Constants {
             Map.entry("/", 63),
             Map.entry("=", 64)
     );
+
+    Map<String, Integer> SUBTASK3_ALPHABET = Map.ofEntries(
+            Map.entry("A", 0),
+            Map.entry("B", 1),
+            Map.entry("C", 2),
+            Map.entry("D", 3),
+            Map.entry("E", 4),
+            Map.entry("F", 5),
+            Map.entry("G", 6),
+            Map.entry("H", 7),
+            Map.entry("I", 8),
+            Map.entry("J", 9),
+            Map.entry("K", 10),
+            Map.entry("L", 11),
+            Map.entry("M", 12),
+            Map.entry("N", 13),
+            Map.entry("O", 14),
+            Map.entry("P", 15),
+            Map.entry("Q", 16),
+            Map.entry("R", 17),
+            Map.entry("S", 18),
+            Map.entry("T", 19),
+            Map.entry("U", 20),
+            Map.entry("V", 21),
+            Map.entry("W", 22),
+            Map.entry("X", 23),
+            Map.entry("Y", 24),
+            Map.entry("Z", 25));
 }

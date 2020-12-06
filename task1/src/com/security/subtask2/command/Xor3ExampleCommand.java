@@ -33,50 +33,37 @@ public class Xor3ExampleCommand implements ExampleCommand {
         final int keyLength = findKeyLength(cipher);
         //Split into groups by key
         final List<StringBuilder> groupedChars = appendGroupedChars(keyLength, cipher);
-//        for (int i = 0; i < groupedChars.size(); i++) {
-//            System.out.println(i + ": ===== " + groupedChars.get(i));
-//        }
-        System.out.println(2 + ": ===== " + groupedChars.get(1));
-        System.out.println("===================================");
-//        groupedChars.stream()
-//                .peek(g -> System.out.println("\n" + "\n" + "\n" + g))
-//                .map(this::calculateFrequencyMap)
-//                .peek(g -> System.out.println("size: " + g.size()))
-//                .forEach(System.out::println);
-        System.out.println(calculateFrequencyMap(groupedChars.get(1)));
-        System.out.println("=======================================");
 
-//        ENGLISH_LETTERS_FREQUENCY.keySet().forEach(k -> {
-//            System.out.println(k + " ========= ");
-        List<Character> decodedChars1 =  groupedChars.get(1).toString().chars()
-                .map(encoded -> (char) encoded ^ (char) '3')
-                .collect(decoded -> System.out.print((char) decoded));
-//            System.out.println();
-//        });
+//        List<Character> decodedChars1 = groupedChars.get(1).toString().chars()
+//                .map(encoded -> (char) encoded ^ (char) '3')
+//                .collect(decoded -> System.out.print((char) decoded));
 
-//        groupedChars.get(2).toString().chars()
-//                .map(encoded -> (char) encoded ^ ('K' ^ 'n'))
-//                .forEach(ch ->System.out.print(Character.toString(ch)));
-        System.out.println("\nkey: " + (char) ('e' ^ '.') + '3' + (char) ('K' ^ ' '));
-//        System.out.println(decodeByKey(cipher, "K3k"));
-        //TODO: ????
+        System.out.println(decodeByKey(cipher, "K3k"));
+
         return deciphered;
     }
 
-//    private String decodeByKey(final String cipher, final String key) {
-//        final char [] result = new char[cipher.length()];
-//        for (int i = 0; i < key.length(); i++) {
-//            for (int j = 0; j < cipher.length(); j++) {
-//                if (j % key.length() == i) {
-////                    System.out.println("i: " + i);
-////                    System.out.println("j: " + j);
-//                    System.out.print(" " + (char) (key.charAt(i) ^ cipher.charAt(j)));
-//                    result[j] = (char) (key.charAt(i) ^ cipher.charAt(j));
-//                }
-//            }
-//        }
-//        return new String(result);
-//    }
+    private String decodeByKey(final String cipher, final String key) {
+
+        final StringBuilder result = new StringBuilder(cipher.length());
+        final String[] resultArray = new String[cipher.length()];
+        for (int i = 0; i < key.length(); i++) {
+            for (int j = 0; j < cipher.length(); j++) {
+                if (j % key.length() == i) {
+                    resultArray[j] = String.valueOf((char) (key.charAt(i) ^ cipher.charAt(j)));
+
+                }
+            }
+        }
+
+        for (int i = 0; i < cipher.length() - 40; i++) {
+            System.out.print(resultArray[i]);
+            result.append(resultArray[i]);
+        }
+
+        System.out.println(result.toString());
+        return result.toString();
+    }
 
     private List<StringBuilder> appendGroupedChars(final int keyLength, final String cipher) {
         final List<StringBuilder> groups = new ArrayList<>();
