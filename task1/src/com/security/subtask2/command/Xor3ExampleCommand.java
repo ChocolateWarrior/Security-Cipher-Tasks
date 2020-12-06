@@ -22,8 +22,8 @@ public class Xor3ExampleCommand implements ExampleCommand {
 
     @Override
     public void execute() throws DecoderException {
-//        System.out.println("KEY LENGTH: " + findKeyLength());
-        decipherXorRepeatingKey();
+        final String deciphered  = decipherXorRepeatingKey();
+        System.out.println(deciphered);
     }
 
     private String decipherXorRepeatingKey() throws DecoderException {
@@ -57,7 +57,6 @@ public class Xor3ExampleCommand implements ExampleCommand {
         final String key = "" + (char) ('.' ^ 'e') + (char) ('A' ^ 'r') + (char) ('K' ^ ' ');
 //        System.out.println(key);
         deciphered = decodeByKey(cipher, key);
-        System.out.println(deciphered);
         return deciphered;
     }
 
