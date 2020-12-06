@@ -14,6 +14,7 @@ import static com.security.util.Constants.SUBTASK1_CIPHERED;
 
 public class DecipherCaesarXorExampleCommand implements ExampleCommand {
 
+    public static final String TASK_2 = "Now try a repeating-key XOR cipher. E.g. it should take a string \"hello world\" and, given the key is \"key\", xor the first letter \"h\" with \"k\", then xor \"e\" with \"e\", then \"l\" with \"y\", and then xor next char \"l\" with \"k\" again, then \"o\" with \"e\" and so on. You may use an index of coincidence, Hamming distance, Kasiski examination, statistical tests or whatever method you feel would show the best result. ";
 
     @Override
     public void execute() {
@@ -30,8 +31,9 @@ public class DecipherCaesarXorExampleCommand implements ExampleCommand {
             variants.add(xorEach(charList, xorCount));
         }
 
-        printVariants(variants);
-        System.out.println(deciphered);
+//        printVariants(variants);
+//        System.out.println(deciphered); // 1 of 256 variants suited was found manually so we sout it for convenience instead
+        System.out.println(TASK_2);
     }
 
     private List<Character> getChars(String ciphered) {
