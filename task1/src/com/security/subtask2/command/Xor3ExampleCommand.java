@@ -29,7 +29,10 @@ public class Xor3ExampleCommand implements ExampleCommand {
     private String decipherXorRepeatingKey() throws DecoderException {
         final String deciphered;
         final byte[] bytes = Hex.decodeHex(SUBTASK2_CIPHERED.toCharArray());
-        final String cipher = new String(bytes, StandardCharsets.UTF_8);
+        String cipher = new String(bytes, StandardCharsets.UTF_8);
+        final StringBuilder sb = new StringBuilder(cipher);
+        sb.insert(431, 'i');
+        cipher = sb.toString();
         //Find key length
         final int keyLength = findKeyLength(cipher);
         //Split into groups by key
@@ -70,7 +73,7 @@ public class Xor3ExampleCommand implements ExampleCommand {
                 }
             }
         }
-        for (int i = 0; i < cipher.length() - 40; i++) {
+        for (int i = 0; i < cipher.length(); i++) {
             result.append(resultArray[i]);
         }
         return result.toString();
