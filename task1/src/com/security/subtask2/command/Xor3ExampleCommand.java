@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.security.util.Constants.ENGLISH_LETTERS_FREQUENCY;
 import static com.security.util.Constants.SUBTASK2_CIPHERED;
 
 
@@ -21,12 +22,12 @@ public class Xor3ExampleCommand implements ExampleCommand {
 
     @Override
     public void execute() throws DecoderException {
-//        System.out.println("KEY LENGTH: " + findKeyLength());
-        decipherXorRepeatingKey();
+        final String deciphered  = decipherXorRepeatingKey();
+        System.out.println(deciphered);
     }
 
     private String decipherXorRepeatingKey() throws DecoderException {
-        final String deciphered = "";
+        final String deciphered;
         final byte[] bytes = Hex.decodeHex(SUBTASK2_CIPHERED.toCharArray());
         final String cipher = new String(bytes, StandardCharsets.UTF_8);
         //Find key length
@@ -40,11 +41,32 @@ public class Xor3ExampleCommand implements ExampleCommand {
 
         System.out.println(decodeByKey(cipher, "K3k"));
 
+//        for (int i = 0; i < groupedChars.size(); i++) {
+//            System.out.println(i + ": ===== " + groupedChars.get(i));
+//        }
+//        System.out.println("===================================");
+//        groupedChars.stream()
+//                .peek(g -> System.out.println("\n" + "\n" + "\n" + g))
+//                .map(this::calculateFrequencyMap)
+//                .peek(g -> System.out.println("size: " + g.size()))
+//                .forEach(System.out::println);
+//        System.out.println("=======================================");
+
+//        ENGLISH_LETTERS_FREQUENCY.keySet().forEach(potentialEncodedChar -> {
+//            System.out.println(potentialEncodedChar + " ========= ");
+//            groupedChars.get(0).toString().chars()
+//                    .map(encoded -> (char) encoded ^ (potentialEncodedChar ^ '.'))
+//                    .forEach(ch -> System.out.print(Character.toString(ch)));
+//            System.out.println();
+//        });
+
+        final String key = "" + (char) ('.' ^ 'e') + (char) ('A' ^ 'r') + (char) ('K' ^ ' ');
+//        System.out.println(key);
+        deciphered = decodeByKey(cipher, key);
         return deciphered;
     }
 
     private String decodeByKey(final String cipher, final String key) {
-
         final StringBuilder result = new StringBuilder(cipher.length());
         final String[] resultArray = new String[cipher.length()];
         for (int i = 0; i < key.length(); i++) {
@@ -98,7 +120,6 @@ public class Xor3ExampleCommand implements ExampleCommand {
             double coincidenceCount = getCoincidenceFrequency(shift(shiftCount, cipher), cipher);
             orderToFrequencyMap.put(shiftCount, coincidenceCount);
         }
-//        orderToFrequencyMap.values().forEach(System.out::println);
         return getKeyDiffFromMap(orderToFrequencyMap);
     }
 
@@ -142,11 +163,5 @@ public class Xor3ExampleCommand implements ExampleCommand {
 
     private boolean isOnMutualPosition(final String shifted, int i, final String cipher) {
         return cipher.charAt(i) == shifted.charAt(i);
-    }
-
-    private List<Character> getChars(String ciphered) {
-        return Arrays.stream(ciphered.split(""))
-                .map(x -> x.charAt(0))
-                .collect(Collectors.toList());
     }
 }
