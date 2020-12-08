@@ -10,15 +10,15 @@ public class Main {
     public static void main(String[] args) throws Exception{
 
         System.out.println(">>>>> Base64");
-        ExampleCommand base64ExampleCommand = new Base64ExampleCommand();
+        final ExampleCommand base64ExampleCommand = new Base64ExampleCommand();
         base64ExampleCommand.execute();
 
         System.out.println(">>>>> Subtask1");
-        ExampleCommand decipherCaesarCommand = new DecipherCaesarXorExampleCommand();
+        final ExampleCommand decipherCaesarCommand = new DecipherCaesarXorExampleCommand();
         decipherCaesarCommand.execute();
 
         System.out.println(">>>>> Subtask2");
-        ExampleCommand xor3Command = new Xor3ExampleCommand();
+        final ExampleCommand xor3Command = new Xor3ExampleCommand();
         xor3Command.execute();
     }
 }
