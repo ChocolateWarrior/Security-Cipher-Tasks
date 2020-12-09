@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.security.util.Constants.ENGLISH_LETTERS_FREQUENCY;
 import static com.security.util.Constants.SUBTASK2_CIPHERED;
 
 

@@ -4,5 +4,5 @@ import org.apache.commons.codec.DecoderException;
 
 //
 public interface ExampleCommand {
-    void execute() throws DecoderException;
+    void execute() throws DecoderException, InterruptedException;
 }
