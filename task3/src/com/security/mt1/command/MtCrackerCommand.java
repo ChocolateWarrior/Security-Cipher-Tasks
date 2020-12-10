@@ -10,21 +10,21 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class MtCrackerCommand implements ExampleCommand {
-    private static final String PLAYER_ID = "PlayerMT";
+    private static final String PLAYER_ID = "PlayerEasyMT";
     private static final String MODE = "Mt";
-    private static final int PERIOD = 10;
+    private static final int PERIOD = 5;
 
     @Override
     public void execute() throws Exception {
         Client.createAcc(PLAYER_ID);
 
         final Optional<Bet> tryBet1 = Client.createBet(MODE, PLAYER_ID, 3, 3);
-        final int realNumber = (int) tryBet1.orElseThrow(NumberFormatException::new).getRealNumber();
+        final long realNumber = tryBet1.orElseThrow(NumberFormatException::new).getRealNumber();
         final int time = (int) Instant.now().getEpochSecond();
 
         final MersenneTwister serverGenerator = IntStream.range(time - PERIOD, time + PERIOD)
                 .mapToObj(MersenneTwister::new)
-                .filter(generator -> generator.nextInt() == realNumber)
+                .filter(generator -> Integer.toUnsignedLong(generator.nextInt()) == realNumber)
                 .findFirst()
                 .orElseThrow(NullPointerException::new);
 

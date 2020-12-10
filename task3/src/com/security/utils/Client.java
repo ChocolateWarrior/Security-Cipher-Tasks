@@ -40,7 +40,6 @@ public class Client {
 
         final HttpResponse<String> response =
                 client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.statusCode());
         return response.statusCode() == 200 ? Optional.of(objectMapper.readValue(response.body(), Bet.class)) : Optional.empty();
     }
 }
