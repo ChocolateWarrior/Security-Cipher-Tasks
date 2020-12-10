@@ -42,7 +42,7 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
 
     private int findKeyLength() {
         int keyLength = 0;
-        Map<Character, Double> monogramToFrequencyMap = populateMonogramToFrequencyMap(); 
+        Map<Character, Double> monogramToFrequencyMap = populateMonogramToFrequencyMap();
 
         return keyLength;
     }
@@ -73,19 +73,24 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
     private Population getNextPopulation(Population parentPopulation) {
 
         Population nextPopulation = Population.empty();
+        nextPopulation.setGroupIndex(parentPopulation.getGroupIndex());
+        nextPopulation.setKeyGroup(parentPopulation.getKeyGroup());
 
         for (int i = checkElitism(parentPopulation, nextPopulation); i < parentPopulation.getIndividuals().size(); i++) {
             Individual father = selectionTournament(parentPopulation);
             Individual mother = selectionTournament(parentPopulation);
 
-            Individual offspring = crossover(father, mother);
-            performMutation(offspring);
+            List<Individual> offspring = crossover(father, mother);
+            offspring.forEach(this::performMutation);
 
-            offspring.setFitness(getFitness(offspring.getKey().stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining())));
 
-            nextPopulation.addIndividual(offspring);
+            offspring.forEach(x -> {
+                setFitness(getFitness(x.getKey().stream()
+                        .map(String::valueOf)
+                        .collect(Collectors.joining())));
+            });
+
+            offspring.forEach(nextPopulation::addIndividual);
         }
 
         return nextPopulation;
@@ -136,37 +141,102 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
         trigramToCountMap.forEach((key, value) -> decodedTrigramMap.put(key, value / (double) (decoded.length() - 2)));
     }
 
-    private Individual crossover(Individual father, Individual mother) {
-        Individual offspring = Individual.empty();
+    private List<Individual> crossover(Individual father, Individual mother) {
+        List<Individual> offspring = new ArrayList<>();
 
-        IntStream.range(0, ALPHABET.length())
-                .forEach(index -> {
-                    List<Character> offspringKey = offspring.getKey();
-                    Character characterToAdd;
-                    if (Math.random() <= CROSSOVER) {
-                        characterToAdd = father.getKey().get(index);
-                    } else {
-                        characterToAdd = mother.getKey().get(index);
-                    }
+        Individual leftChild = getChild(true, father, mother);
+        Individual rightChild = getChild(false, father, mother);
 
-                    if (!offspringKey.contains(characterToAdd)) {
-                        offspringKey.set(index, characterToAdd);
-                    }
-                });
-
-        getAlphabetCharList().stream()
-                .filter(character -> !offspring.getKey().contains(character))
-                .forEach(character -> {
-                    List<Integer> emptyPositions = IntStream.range(0, ALPHABET.length())
-                            .filter(index -> offspring.getKey().get(index).equals(' '))
-                            .boxed()
-                            .collect(Collectors.toList());
-                    int randomIndex = (int) (Math.random() * emptyPositions.size());
-
-                    offspring.getKey().set(emptyPositions.get(randomIndex), character);
-                });
+        offspring.add(leftChild);
+        offspring.add(rightChild);
 
         return offspring;
+    }
+
+    private Individual getChild(boolean directionAscending, Individual father, Individual mother) {
+        Individual child = Individual.empty();
+        List<Character> childKey = new ArrayList<>();
+        if (directionAscending) {
+            for (int i = 0; i < ALPHABET.length(); i++) {
+                Character fatherCurrent = father.getKey().get(i);
+                Character motherCurrent = mother.getKey().get(i);
+
+                Double fatherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(fatherCurrent));
+                Double motherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(motherCurrent));
+
+                Character mostFrequent;
+                Character leastFrequent;
+
+                if (fatherCharacterFrequency >= motherCharacterFrequency) {
+                    mostFrequent = fatherCurrent;
+                    leastFrequent = motherCurrent;
+                } else {
+                    mostFrequent = motherCurrent;
+                    leastFrequent = fatherCurrent;
+                }
+
+                if (childKey.contains(mostFrequent)) {
+                    if (childKey.contains(leastFrequent)) {
+                        childKey.add(chooseRandom(childKey));
+                    } else {
+                        childKey.add(leastFrequent);
+                    }
+                } else {
+                    childKey.add(mostFrequent);
+                }
+            }
+        } else {
+            for (int i = ALPHABET.length(); i > 0; i--) {
+                Character fatherCurrent = father.getKey().get(i);
+                Character motherCurrent = mother.getKey().get(i);
+
+                Double fatherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(fatherCurrent));
+                Double motherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(motherCurrent));
+
+                Character mostFrequent;
+                Character leastFrequent;
+
+                if (fatherCharacterFrequency <= motherCharacterFrequency) {
+                    mostFrequent = motherCurrent;
+                    leastFrequent = fatherCurrent;
+                } else {
+                    mostFrequent = fatherCurrent;
+                    leastFrequent = motherCurrent;
+                }
+
+                if (childKey.contains(leastFrequent)) {
+                    if (childKey.contains(mostFrequent)) {
+                        childKey.add(0, chooseRandom(childKey));
+                    } else {
+                        childKey.add(0, leastFrequent);
+                    }
+                } else {
+                    childKey.add(0, leastFrequent);
+                }
+            }
+        }
+
+        child.setKey(childKey);
+
+        return child;
+    }
+
+    private Character chooseRandom(List<Character> childKey) {
+        List<Character> spareCharacters = Arrays.stream(ALPHABET.toUpperCase().split(""))
+                .map(x -> x.charAt(0))
+                .filter(x -> !childKey.contains(x))
+                .collect(Collectors.toList());
+        return spareCharacters.get((int) (Math.random() * spareCharacters.size()));
+    }
+
+    private List<Character> decodeParent(Individual father) {
+        String decodedString = decodeBySubstitution(SUBTASK4_CIPHERED, father.getKey().stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining()));
+
+        return decodedString.chars()
+                .mapToObj(decodedString::charAt)
+                .collect(Collectors.toList());
     }
 
     private void performMutation(final Individual child) {
@@ -195,6 +265,15 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
         populateSelection(populationToProcess, selection, TOURNAMENT_SELECTION_SIZE);
 
         return getFittestFromPopulation(selection);
+    }
+
+    private void populateSelection(Population populationToProcess, Population selection, int sizeOfSelection) {
+        List<Individual> existingIndividuals = new ArrayList<>(List.copyOf(populationToProcess.getIndividuals()));
+        for (int i = 0; i < sizeOfSelection; i++) {
+            int randomId = (int) (Math.random() * populationToProcess.getIndividuals().size());
+            selection.addIndividual(existingIndividuals.get(randomId));
+            existingIndividuals.remove(randomId);
+        }
     }
 
     private String decodeBySubstitution(String cipher, String key) {
@@ -238,13 +317,6 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
                                                             Map<Character, Character> alphabetCharacterToKeyCharacterMap) {
         for (int i = 0; i < alphabet.length(); i++) {
             alphabetCharacterToKeyCharacterMap.put(alphabet.charAt(i), key.charAt(i));
-        }
-    }
-
-    private void populateSelection(Population populationToProcess, Population selection, int sizeOfSelection) {
-        for (int i = 0; i < sizeOfSelection; i++) {
-            int randomId = (int) (Math.random() * populationToProcess.getIndividuals().size());
-            selection.addIndividual(populationToProcess.getIndividuals().get(randomId));
         }
     }
 
