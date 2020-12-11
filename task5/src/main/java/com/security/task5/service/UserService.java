@@ -3,6 +3,7 @@ package com.security.task5.service;
 import com.security.task5.dto.UserDTO;
 import com.security.task5.model.User;
 import com.security.task5.repository.UserRepository;
+import com.security.task5.utils.PasswordEncoder;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -11,16 +12,18 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(final UserRepository userRepository) {
+    public UserService(final UserRepository userRepository, final PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
     public User login(final UserDTO userDTO) {
         final User user = userRepository.findByLogin(userDTO.getLogin());
-        if (user == null || !user.getPassword().equals(userDTO.getPassword())) {
-            return null;//"";
+        if (user == null || !passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+            return null;
         }
         return user;
     }
@@ -32,11 +35,14 @@ public class UserService {
             log.warn("login not unique!");
             return false;
         }
+        final String userPassword = userdto.getPassword();
+
+        final String hash = passwordEncoder.encode(userPassword);
 
         final User user = User
                 .builder()
                 .login(userdto.getLogin())
-                .password(userdto.getPassword())
+                .password(hash)
                 .build();
 
         userRepository.save(user);
