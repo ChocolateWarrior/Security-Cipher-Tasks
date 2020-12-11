@@ -20,4 +20,8 @@ public class User {
     private String login;
     @Column(name = "password", nullable = false)
     private String password;
+    @Column(name = "version", nullable = false)
+    private String version;
+    @Column(name = "compromised", nullable = false)
+    private Boolean compromised;
 }

@@ -5,6 +5,7 @@ import com.security.task5.model.User;
 import com.security.task5.repository.UserRepository;
 import com.security.task5.utils.PasswordEncoder;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Log4j2
@@ -13,10 +14,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private Environment env;
 
-    public UserService(final UserRepository userRepository, final PasswordEncoder passwordEncoder) {
+    public UserService(final UserRepository userRepository,
+                       final PasswordEncoder passwordEncoder,
+                       final Environment env) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.env = env;
     }
 
 
@@ -43,6 +48,8 @@ public class UserService {
                 .builder()
                 .login(userdto.getLogin())
                 .password(hash)
+                .compromised(false)
+                .version(env.getProperty("encryption.version"))
                 .build();
 
         userRepository.save(user);
