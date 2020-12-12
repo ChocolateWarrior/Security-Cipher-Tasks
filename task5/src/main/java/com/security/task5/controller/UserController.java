@@ -23,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping("register")
-    public boolean saveUser(@RequestBody UserDTO user) {
+    public String saveUser(@RequestBody UserDTO user) {
         return userService.saveNewUser(user);
     }
 

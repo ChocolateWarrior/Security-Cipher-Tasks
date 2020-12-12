@@ -8,13 +8,14 @@ import java.util.Arrays;
 
 @Component
 public class PasswordEncoder {
-    final private Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(16, 32, 1, 65536, 10);
-    final private SHA3.DigestSHA3 digestSHA3 = new SHA3.Digest512();
-
+    private final Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(16, 32, 1, 65536, 10);
+    private final SHA3.DigestSHA3 digestSHA3 = new SHA3.Digest512();
 
     public final String encode(final String password) {
         final byte[] digest = digestSHA3.digest(password.getBytes());
+        System.out.println(digest);
         final String hash = encoder.encode(Arrays.toString(digest));
+        System.out.println(hash);
         return hash;
     }
 
