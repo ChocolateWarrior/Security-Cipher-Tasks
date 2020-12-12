@@ -19,18 +19,26 @@ public class GeneticAlgorithmProcess extends Thread {
     @Override
     public void run() {
         Population population = getInitialPopulation();
-//        System.out.println(population);
+        System.out.println(population);
+
         for (int i = 0; i < MAX_GENERATION_SIZE; i++) {
             Individual fittest = getFittestFromPopulation(population);
-//            System.out.println(" Generation: " + i);
-//            System.out.println(" Fitness: " + fittest.getFitness() + " , Key: " + fittest.getKey());
+            System.out.println(" Generation: " + i);
+            System.out.println(" Fitness: " + fittest.getFitness() + " , Key: " + fittest.getKey());
             population = getNextPopulation(population);
         }
+
+        System.out.println("fittest: " + getFittestFromPopulation(population));
 
         key = getFittestFromPopulation(population).getKey().stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining());
         result = decodeBySubstitution(SUBTASK3_CIPHERED, key);
+
+        System.out.println("Key: ");
+        System.out.println(key);
+        System.out.println("Result: ");
+        System.out.println(result);
     }
 
     private Population getNextPopulation(final Population parentPopulation) {
@@ -214,7 +222,7 @@ public class GeneticAlgorithmProcess extends Thread {
     private void populateRandomKeys(final List<List<Character>> randomKeys) {
         final List<Character> alphabet = getAlphabetCharList();
 
-        for (int i = 0; i < alphabet.size(); ) {
+        for (int i = 0; i < POPULATION_SIZE_SUBTASK3; ) {
             Collections.shuffle(alphabet);
             if (!randomKeys.contains(alphabet)) {
                 randomKeys.add(new ArrayList<>(alphabet));

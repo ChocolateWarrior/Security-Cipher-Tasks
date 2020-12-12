@@ -28,11 +28,11 @@ public class SubstitutionExampleCommand implements ExampleCommand {
         final List<GeneticAlgorithmProcess> processes = createThreads();
 
         processes.forEach(Thread::start);
-        Thread.sleep(6000);
-        processes.forEach(x -> deciphered.append("\nkey: ")
-                .append(x.getKey())
-                .append("\nresult: ")
-                .append(x.getResult()));
+//        Thread.sleep(20000);
+//        processes.forEach(x -> deciphered.append("\nkey: ")
+//                .append(x.getKey())
+//                .append("\nresult: ")
+//                .append(x.getResult()));
 
         return deciphered.toString();
     }

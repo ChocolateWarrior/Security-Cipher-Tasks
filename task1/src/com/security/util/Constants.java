@@ -10,6 +10,7 @@ public interface Constants {
 
     int THREAD_POOL_SIZE = 4;
     int POPULATION_SIZE = 120;
+    int POPULATION_SIZE_SUBTASK3 = 500;
     int MAX_GENERATION_SIZE = 50;
     int TOURNAMENT_SELECTION_SIZE = 100;
     double CROSSOVER = 0.5;
