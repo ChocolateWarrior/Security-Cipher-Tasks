@@ -1,6 +1,7 @@
 package com.security.subtask4.command;
 
 import com.security.subtask4.process.PolyAlphabeticAlgorithmProcess;
+import com.security.subtask4.service.KeyLengthSearchService;
 import com.security.util.ExampleCommand;
 
 import java.util.List;
@@ -31,17 +32,19 @@ public class PolyAlphabeticExampleCommand implements ExampleCommand {
 
         processes.forEach(Thread::start);
         Thread.sleep(6000);
-        processes.forEach(x -> deciphered.append("\nkey: ")
-                .append(x.getKeys())
-                .append("\nresult: ")
-                .append(x.getResult()));
-
-        return deciphered.toString();
+//        processes.forEach(x -> deciphered.append("\nkey: ")
+//                .append(x.getKeys())
+//                .append("\nresult: ")
+//                .append(x.getResult()));
+//
+//        return deciphered.toString();
+        return " ";
     }
 
     private List<PolyAlphabeticAlgorithmProcess> createThreads() {
+        KeyLengthSearchService service = new KeyLengthSearchService();
         return IntStream.range(0, THREAD_POOL_SIZE)
-                .mapToObj(x -> new PolyAlphabeticAlgorithmProcess())
+                .mapToObj(x -> new PolyAlphabeticAlgorithmProcess(service))
                 .collect(Collectors.toList());
     }
 

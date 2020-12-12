@@ -2,133 +2,145 @@ package com.security.subtask4.process;
 
 import com.security.subtask4.entities.Individual;
 import com.security.subtask4.entities.Population;
+import com.security.subtask4.service.KeyLengthSearchService;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.security.util.CiphersUtils.ENG_TRIGRAM_FREQUENCY_MAP;
+import static com.security.util.CiphersUtils.*;
 import static com.security.util.Constants.*;
 
 public class PolyAlphabeticAlgorithmProcess extends Thread {
 
     private String result;
-    private String ciphered;
-    private List<String> keys;
+    private List<List<Character>> keys;
+    private double maxFitness;
+    private final KeyLengthSearchService keyLengthSearchService;
+
+    public PolyAlphabeticAlgorithmProcess(KeyLengthSearchService keyLengthSearchService) {
+        this.keyLengthSearchService = keyLengthSearchService;
+    }
 
     @Override
     public void run() {
 
-        int keyLength = findKeyLength();
-        List<Population> populationGroup = getInitialPopulationGroup(keyLength);
+        int keyLength = (int) keyLengthSearchService.findKeyLength();
+        List<Population> populationGroup = getRandomInitialPopulation(keyLength);
 
-        for (int i = 0; i < MAX_GENERATION_SIZE; i++) {
+        maxFitness = populationGroup.get(0).getIndividuals().get(0).getFitness();
+        populationGroup.forEach(System.out::println);
+
+        for (int i = 1; i < MAX_GENERATION_SIZE; i++) {
             List<Population> fittestPopulationGroup = new ArrayList<>();
-            for (int j = 0; j < populationGroup.size(); i++) {
-                fittestPopulationGroup.add(getNextPopulation(populationGroup.get(j)));
+
+            for (Population population : populationGroup) {
+                fittestPopulationGroup.add(getNextPopulation(population));
             }
             populationGroup = fittestPopulationGroup;
+
             if (i % SHARE_PERIOD == 0) {
-                shareKeys();
+                shareKeys(populationGroup);
+                System.out.println("Generation: " + i);
+
             }
         }
 
-        keys = populationGroup.get(0).getKeyGroup().stream()
-                .map(String::valueOf)
-                .collect(Collectors.toList());
+//        System.out.println("Population winner: ");
+//        populationGroup.forEach(System.out::println);
+        keys = populationGroup.get(0).getKeyGroup();
         result = decodeBySubstitutionGrouped(SUBTASK4_CIPHERED, keys);
 
+//        System.out.println("Max fitness: " + maxFitness);
+        System.out.println("Key length: " + keyLength);
+        System.out.println("Result: " + result);
     }
 
-    private int findKeyLength() {
-        int keyLength = 0;
-        Map<Character, Double> monogramToFrequencyMap = populateMonogramToFrequencyMap();
 
-        return keyLength;
+
+    private void shareKeys(List<Population> populationGroup) {
+        populationGroup.forEach(population -> population.setKeyGroup(getFittestKey(populationGroup)));
     }
 
-    private Map<Character, Double> populateMonogramToFrequencyMap() {
-        Map<Character, Double> monogramToFrequencyMap = new HashMap<>();
-        Map<Character, Integer> monogramToCountMap = new HashMap<>();
-        IntStream.range(0, SUBTASK4_CIPHERED.length())
-                .mapToObj(x -> ALPHABET.toUpperCase().charAt(x))
-                .filter(x -> ALPHABET.toUpperCase().contains(x.toString()))
-                .forEach(x -> {
-                    if (monogramToCountMap.containsKey(x)) {
-                        Integer count = monogramToCountMap.get(x);
-                        monogramToCountMap.put(x, count + 1);
-                    } else {
-                        monogramToCountMap.put(x, 1);
-                    }
-                });
-
-        monogramToCountMap.forEach((k, v) -> monogramToFrequencyMap.put(k, (double) v / SUBTASK4_CIPHERED.length()));
-        return monogramToFrequencyMap;
-    }
-
-    private void shareKeys() {
-
+    private List<List<Character>> getFittestKey(List<Population> populationGroup) {
+        return populationGroup.stream()
+                .map(x -> getFittestFromPopulation(x).getKey())
+                .collect(Collectors.toList());
     }
 
     private Population getNextPopulation(Population parentPopulation) {
-
         Population nextPopulation = Population.empty();
+
         nextPopulation.setGroupIndex(parentPopulation.getGroupIndex());
         nextPopulation.setKeyGroup(parentPopulation.getKeyGroup());
 
-        for (int i = checkElitism(parentPopulation, nextPopulation); i < parentPopulation.getIndividuals().size(); i++) {
+        for (int i = checkElitism(parentPopulation, nextPopulation); i < parentPopulation.getIndividuals().size(); ) {
+
             Individual father = selectionTournament(parentPopulation);
             Individual mother = selectionTournament(parentPopulation);
 
             List<Individual> offspring = crossover(father, mother);
             offspring.forEach(this::performMutation);
 
-
-            offspring.forEach(x -> {
-                setFitness(getFitness(x.getKey().stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.joining())));
-            });
+            offspring.forEach(x -> x.setFitness(
+                    getFitness(decodeBySubstitutionGrouped(SUBTASK4_CIPHERED,
+                            appendKey(parentPopulation, x, parentPopulation.getKeyGroup())))));
 
             offspring.forEach(nextPopulation::addIndividual);
+
+            i += 2;
         }
 
         return nextPopulation;
     }
 
-    private int checkElitism(Population parentPopulation, Population nextPopulation) {
-        if (IS_ELITISM) {
-            nextPopulation.addIndividual(getFittestFromPopulation(parentPopulation));
-            return 1;
-        }
-        return 0;
+    private List<List<Character>> appendKey(Population parentPopulation, Individual x, List<List<Character>> parentKeys) {
+        return IntStream.range(0, parentKeys.size())
+                .mapToObj(index -> index == parentPopulation.getGroupIndex() ? x.getKey() :
+                        parentKeys.get(index))
+                .collect(Collectors.toList());
     }
 
-    public double getFitness(String key) {
+    public double getInitialFitness(String cipheredChunk, String key) {
+
+        String decoded = decodeBySubstitution(cipheredChunk, key);
+        return calculateNGramFitness(decoded, 1, ENG_MONOGRAM_FREQUENCY_MAP, MONOGRAM_WEIGHT);
+    }
+
+    //  TODO: add fourgram to analysis
+    public double getFitness(String decoded) {
+
+        final double monogramFitness = calculateNGramFitness(decoded, 1, ENG_MONOGRAM_FREQUENCY_MAP, MONOGRAM_WEIGHT);
+        final double bigramFitness = calculateNGramFitness(decoded, 2, ENG_BIGRAM_FREQUENCY_MAP, BIGRAM_WEIGHT);
+        final double trigramFitness = calculateNGramFitness(decoded, 3, ENG_TRIGRAM_FREQUENCY_MAP, TRIGRAM_WEIGHT);
+
+        double totalFitness = monogramFitness + bigramFitness + trigramFitness;
+        if (totalFitness >= maxFitness) {
+            maxFitness = totalFitness;
+        }
+        return totalFitness;
+    }
+
+    private double calculateNGramFitness(String decoded, int n, Map<String, Double> constantFrequencyMap, double weight) {
         double fitness;
-        String decoded = decodeBySubstitution(SUBTASK4_CIPHERED, key);
+        Map<String, Double> decodedNgramToFrequencyMap = new HashMap<>(decoded.length());
+        populateDecodedNgramMap(decoded, decodedNgramToFrequencyMap, n);
 
-        Map<String, Double> decodedTrigramToFrequencyMap = new HashMap<>(decoded.length());
-
-        populateDecodedTrigramMap(decoded, decodedTrigramToFrequencyMap);
-
-        fitness = decodedTrigramToFrequencyMap.entrySet().stream()
-                .filter(entry -> ENG_TRIGRAM_FREQUENCY_MAP.containsKey(entry.getKey()))
+        fitness = decodedNgramToFrequencyMap.entrySet().stream()
+                .filter(entry -> constantFrequencyMap.containsKey(entry.getKey()))
                 .mapToDouble(entry -> {
-                    Double frequencyInConstant = ENG_TRIGRAM_FREQUENCY_MAP.get(entry.getKey());
-                    Double frequencyInDecoded = entry.getValue();
-
-                    return frequencyInDecoded * (Math.log10(frequencyInConstant) / Math.log10(2.0d));
+                    Double sourceLogFreq = constantFrequencyMap.get(entry.getKey());
+                    return entry.getValue() * (Math.log(sourceLogFreq) / Math.log(2.0));
                 })
                 .sum();
 
         return fitness;
     }
 
-    private void populateDecodedTrigramMap(String decoded, Map<String, Double> decodedTrigramMap) {
+    private void populateDecodedNgramMap(String decoded, Map<String, Double> decodedNgramMap, int n) {
         Map<String, Integer> trigramToCountMap = new HashMap<>();
-        IntStream.range(0, decoded.length() - 3)
-                .mapToObj(i -> decoded.substring(i, i + 3))
+        IntStream.range(0, decoded.length() - n)
+                .mapToObj(i -> decoded.substring(i, i + n))
                 .forEach(trigram -> {
                     if (trigramToCountMap.containsKey(trigram)) {
                         Integer count = trigramToCountMap.get(trigram);
@@ -138,7 +150,7 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
                     }
                 });
 
-        trigramToCountMap.forEach((key, value) -> decodedTrigramMap.put(key, value / (double) (decoded.length() - 2)));
+        trigramToCountMap.forEach((key, value) -> decodedNgramMap.put(key, value / (double) (decoded.length() - (n - 1))));
     }
 
     private List<Individual> crossover(Individual father, Individual mother) {
@@ -157,12 +169,12 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
         Individual child = Individual.empty();
         List<Character> childKey = new ArrayList<>();
         if (directionAscending) {
-            for (int i = 0; i < ALPHABET.length(); i++) {
+            for (int i = 0; i < SUBTASK3_ALPHABET.size(); i++) {
                 Character fatherCurrent = father.getKey().get(i);
                 Character motherCurrent = mother.getKey().get(i);
 
-                Double fatherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(fatherCurrent));
-                Double motherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(motherCurrent));
+                Double fatherCharacterFrequency = SUBTASK3_ALPHABET.get(fatherCurrent);
+                Double motherCharacterFrequency = SUBTASK3_ALPHABET.get(motherCurrent);
 
                 Character mostFrequent;
                 Character leastFrequent;
@@ -187,11 +199,11 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
             }
         } else {
             for (int i = ALPHABET.length(); i > 0; i--) {
-                Character fatherCurrent = father.getKey().get(i);
-                Character motherCurrent = mother.getKey().get(i);
+                Character fatherCurrent = father.getKey().get(i - 1);
+                Character motherCurrent = mother.getKey().get(i - 1);
 
-                Double fatherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(fatherCurrent));
-                Double motherCharacterFrequency = ENGLISH_LETTERS_FREQUENCY.get(Character.toLowerCase(motherCurrent));
+                Double fatherCharacterFrequency = SUBTASK3_ALPHABET.get(fatherCurrent);
+                Double motherCharacterFrequency = SUBTASK3_ALPHABET.get(motherCurrent);
 
                 Character mostFrequent;
                 Character leastFrequent;
@@ -229,16 +241,6 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
         return spareCharacters.get((int) (Math.random() * spareCharacters.size()));
     }
 
-    private List<Character> decodeParent(Individual father) {
-        String decodedString = decodeBySubstitution(SUBTASK4_CIPHERED, father.getKey().stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining()));
-
-        return decodedString.chars()
-                .mapToObj(decodedString::charAt)
-                .collect(Collectors.toList());
-    }
-
     private void performMutation(final Individual child) {
 
         List<Character> key = child.getKey();
@@ -268,9 +270,10 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
     }
 
     private void populateSelection(Population populationToProcess, Population selection, int sizeOfSelection) {
-        List<Individual> existingIndividuals = new ArrayList<>(List.copyOf(populationToProcess.getIndividuals()));
+        List<Individual> existingIndividuals = new ArrayList<>(populationToProcess.getIndividuals());
+
         for (int i = 0; i < sizeOfSelection; i++) {
-            int randomId = (int) (Math.random() * populationToProcess.getIndividuals().size());
+            int randomId = new Random().nextInt(existingIndividuals.size());
             selection.addIndividual(existingIndividuals.get(randomId));
             existingIndividuals.remove(randomId);
         }
@@ -287,27 +290,73 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
                 .collect(Collectors.joining());
     }
 
-    private String decodeBySubstitutionGrouped(String cipher, List<String> groupedKeys) {
-        String decoded = "";
-
-        return decoded;
-    }
-
-    private List<Population> getInitialPopulationGroup(int keyLength) {
-        return IntStream.range(0, keyLength)
-                .mapToObj(this::getInitialPopulation)
+    public String decodeBySubstitutionGrouped(String cipher, List<List<Character>> groupedKeys) {
+        String result;
+        List<Character> decoded = new ArrayList<>();
+        List<Character> alphabetCharList = getAlphabetCharList();
+        List<Character> cipherCharList = cipher.chars()
+                .mapToObj(x -> (char) x)
                 .collect(Collectors.toList());
+
+        for (int i = 0; i < cipherCharList.size(); i++) {
+            int id = groupedKeys.get(i % groupedKeys.size()).indexOf(cipherCharList.get(i));
+
+            if (id >= 0) {
+                decoded.add(alphabetCharList.get(id));
+            }
+        }
+        result = decoded.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining());
+
+        return result;
     }
 
-    private Population getInitialPopulation(int populationIndex) {
+    private List<Population> getRandomInitialPopulation(int keyLength) {
+
+        Map<Integer, List<Character>> cipheredWithSameKeyMap =
+                populateIndexToCharacterMap(SUBTASK4_CIPHERED.toCharArray(), keyLength);
+
+        List<Population> initialGroup = IntStream.range(0, keyLength).mapToObj(index ->
+                getInitialPopulation(index, POPULATION_SIZE,
+                        cipheredWithSameKeyMap.get(index).stream()
+                                .map(String::valueOf)
+                                .collect(Collectors.joining())))
+                .collect(Collectors.toList());
+
+        List<List<Character>> initialKeys = initialGroup.stream()
+                .map(this::getFittestFromPopulation)
+                .map(Individual::getKey)
+                .collect(Collectors.toList());
+
+        initialGroup.forEach(population -> population.setKeyGroup(initialKeys));
+
+        initialGroup.forEach(population ->
+                population.getIndividuals().forEach(individual ->
+                        individual.setFitness(getFitness(decodeBySubstitutionGrouped(SUBTASK4_CIPHERED,
+                                appendKey(population, individual, initialKeys))))));
+
+        return initialGroup;
+    }
+
+    private Map<Integer, List<Character>> populateIndexToCharacterMap(final char[] characters, final int keyLength) {
+
+        return IntStream.range(0, characters.length)
+                .boxed()
+                .collect(Collectors.groupingBy(index -> index % keyLength,
+                        Collectors.mapping(index -> characters[index], Collectors.toList())));
+    }
+
+    private Population getInitialPopulation(int populationIndex, int populationSize, String cipheredWithSameKey) {
 
         final List<List<Character>> randomKeys = new ArrayList<>();
-        populateRandomKeys(randomKeys);
+
+        populateRandomKeys(randomKeys, populationSize);
 
         List<Individual> individuals = randomKeys.stream()
                 .map(characters -> {
                     String key = characters.stream().map(String::valueOf).collect(Collectors.joining());
-                    return new Individual(characters, getFitness(key));
+                    return new Individual(characters, getInitialFitness(key, cipheredWithSameKey));
                 }).collect(Collectors.toList());
 
         return new Population(populationIndex, individuals);
@@ -326,16 +375,24 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
                 .orElseThrow();
     }
 
-    private void populateRandomKeys(List<List<Character>> randomKeys) {
+    private void populateRandomKeys(List<List<Character>> randomKeys, int size) {
         List<Character> alphabet = getAlphabetCharList();
 
-        for (int i = 0; i < alphabet.size(); ) {
+        for (int i = 0; i < size; ) {
             Collections.shuffle(alphabet);
             if (!randomKeys.contains(alphabet)) {
                 randomKeys.add(new ArrayList<>(alphabet));
                 i++;
             }
         }
+    }
+
+    private int checkElitism(Population parentPopulation, Population nextPopulation) {
+        if (IS_ELITISM) {
+            nextPopulation.addIndividual(getFittestFromPopulation(parentPopulation));
+            return 1;
+        }
+        return 0;
     }
 
     private List<Character> getAlphabetCharList() {
@@ -346,24 +403,11 @@ public class PolyAlphabeticAlgorithmProcess extends Thread {
                 .collect(Collectors.toList());
     }
 
-
-    public String getCiphered() {
-        return ciphered;
-    }
-
-    public void setCiphered(String ciphered) {
-        this.ciphered = ciphered;
-    }
-
     public String getResult() {
         return result;
     }
 
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    public List<String> getKeys() {
+    public List<List<Character>> getKeys() {
         return keys;
     }
 }

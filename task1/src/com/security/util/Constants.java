@@ -8,13 +8,17 @@ public interface Constants {
     String ANSI_BLUE = "\u001B[34m";
     String ANSI_PURPLE = "\u001B[35m";
 
-    int THREAD_POOL_SIZE = 4;
-    int POPULATION_SIZE = 500;
-    int MAX_GENERATION_SIZE = 50;
-    int TOURNAMENT_SELECTION_SIZE = 100;
+    int THREAD_POOL_SIZE = 3;
+    int POPULATION_SIZE = 120;
+    int MAX_GENERATION_SIZE = 600;
+    int TOURNAMENT_SELECTION_SIZE = 120;
     double CROSSOVER = 0.5;
     double MUTATION = 0.1;
-    boolean IS_ELITISM = true;
+    boolean IS_ELITISM = false;
+
+    double TRIGRAM_WEIGHT = 1.5d;
+    double BIGRAM_WEIGHT = 1.25d;
+    double MONOGRAM_WEIGHT = 1d;
 
     int SHARE_PERIOD = 10;
 
