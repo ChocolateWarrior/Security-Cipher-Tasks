@@ -14,7 +14,8 @@ import java.util.regex.Pattern;
 
 @Log4j2
 @Service
-public class UserService {
+public class
+UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -33,14 +34,21 @@ public class UserService {
     }
 
 
-    public User login(final UserDTO userDTO) {
+    public String login(final UserDTO userDTO) {
         final User user = userRepository.findByLogin(userDTO.getLogin());
-        final String code = secretKeyGen.getTOTPCode(userDTO.getSecretKey());
+        final String code = secretKeyGen.getTOTPCode(user.getKey());
         if (user == null || !passwordEncoder.matches(userDTO.getPassword(), user.getPassword())
                 || !code.equals(userDTO.getNumber())) {
-            return null;
+            return "login failed!";
         }
-        return user;
+        if (user.getCompromised()){
+            final String key = secretKeyGen.generateSecretKey();
+            user.setCompromised(false);
+            user.setKey(key);
+            userRepository.save(user);
+            return "You was compromised. Your new secret key is: " + key + ". Please reset your password";
+        }
+        return "login success!";
     }
 
     public String saveNewUser(final UserDTO userdto) {
@@ -59,17 +67,18 @@ public class UserService {
         }
 
         final String hash = passwordEncoder.encode(userPassword);
-
+        final String key = secretKeyGen.generateSecretKey();
         final User user = User
                 .builder()
                 .login(userdto.getLogin())
                 .password(hash)
                 .compromised(false)
                 .version(env.getProperty("encryption.version"))
+                .key(key)
                 .build();
 
         userRepository.save(user);
         log.info("User was saved. Username : " + user.getLogin());
-        return secretKeyGen.generateSecretKey();
+        return key;
     }
 }

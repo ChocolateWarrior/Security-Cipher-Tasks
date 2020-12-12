@@ -24,4 +24,6 @@ public class User {
     private String version;
     @Column(name = "compromised", nullable = false)
     private Boolean compromised;
+    @Column(name = "secretKey", nullable = false)
+    private String key;
 }

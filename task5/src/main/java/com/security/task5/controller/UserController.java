@@ -1,7 +1,6 @@
 package com.security.task5.controller;
 
 import com.security.task5.dto.UserDTO;
-import com.security.task5.model.User;
 import com.security.task5.service.UserService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,6 @@ public class UserController {
 
     @PostMapping("login")
     public String login(@RequestBody UserDTO userDTO) {
-        final User user = userService.login(userDTO);
-        return user == null ? "login failed" : user.getPassword();
+        return userService.login(userDTO);
     }
 }
