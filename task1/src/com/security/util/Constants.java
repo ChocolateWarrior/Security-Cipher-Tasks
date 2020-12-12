@@ -173,5 +173,4 @@ public interface Constants {
             Map.entry('X', 0.0015),
             Map.entry('Y', 0.02),
             Map.entry('Z', 0.00074));
-
 }

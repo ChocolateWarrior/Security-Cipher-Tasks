@@ -7,7 +7,7 @@ public class Population {
 
     private List<Individual> individuals;
 
-    public Population(List<Individual> individuals) {
+    public Population(final List<Individual> individuals) {
         this.individuals = individuals;
     }
 
@@ -15,11 +15,7 @@ public class Population {
         return individuals;
     }
 
-    public void setIndividuals(List<Individual> individuals) {
-        this.individuals = individuals;
-    }
-
-    public void addIndividual(Individual individual) {
+    public void addIndividual(final Individual individual) {
         this.individuals.add(individual);
     }
 

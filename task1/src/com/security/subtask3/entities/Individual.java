@@ -12,7 +12,7 @@ public class Individual {
     private List<Character> key;
     private double fitness;
 
-    public Individual(List<Character> key, double fitness) {
+    public Individual(final List<Character> key, final double fitness) {
         this.key = key;
         this.fitness = fitness;
     }
@@ -25,11 +25,7 @@ public class Individual {
         return fitness;
     }
 
-    public void setKey(List<Character> key) {
-        this.key = key;
-    }
-
-    public void setFitness(double fitness) {
+    public void setFitness(final double fitness) {
         this.fitness = fitness;
     }
 

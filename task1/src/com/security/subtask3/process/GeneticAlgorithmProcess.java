@@ -13,21 +13,16 @@ import static com.security.util.Constants.*;
 public class GeneticAlgorithmProcess extends Thread {
 
     private String result;
-    private String ciphered;
     private String key;
 
     @Override
     public void run() {
-
         Population population = getInitialPopulation();
-
 //        System.out.println(population);
         for (int i = 0; i < MAX_GENERATION_SIZE; i++) {
             Individual fittest = getFittestFromPopulation(population);
-
 //            System.out.println(" Generation: " + i);
 //            System.out.println(" Fitness: " + fittest.getFitness() + " , Key: " + fittest.getKey());
-
             population = getNextPopulation(population);
         }
 
@@ -35,18 +30,17 @@ public class GeneticAlgorithmProcess extends Thread {
                 .map(String::valueOf)
                 .collect(Collectors.joining());
         result = decodeBySubstitution(SUBTASK3_CIPHERED, key);
-
     }
 
-    private Population getNextPopulation(Population parentPopulation) {
+    private Population getNextPopulation(final Population parentPopulation) {
 
-        Population nextPopulation = Population.empty();
+        final Population nextPopulation = Population.empty();
 
         for (int i = checkElitism(parentPopulation, nextPopulation); i < parentPopulation.getIndividuals().size(); i++) {
-            Individual father = selectionTournament(parentPopulation);
-            Individual mother = selectionTournament(parentPopulation);
+            final Individual father = selectionTournament(parentPopulation);
+            final Individual mother = selectionTournament(parentPopulation);
 
-            Individual offspring = crossover(father, mother);
+            final Individual offspring = crossover(father, mother);
             performMutation(offspring);
 
             offspring.setFitness(getFitness(offspring.getKey().stream()
@@ -59,7 +53,7 @@ public class GeneticAlgorithmProcess extends Thread {
         return nextPopulation;
     }
 
-    private int checkElitism(Population parentPopulation, Population nextPopulation) {
+    private int checkElitism(final Population parentPopulation, final Population nextPopulation) {
         if (IS_ELITISM) {
             nextPopulation.addIndividual(getFittestFromPopulation(parentPopulation));
             return 1;
@@ -67,33 +61,29 @@ public class GeneticAlgorithmProcess extends Thread {
         return 0;
     }
 
-    public double getFitness(String key) {
-        double fitness;
-        String decoded = decodeBySubstitution(SUBTASK3_CIPHERED, key);
-        Map<String, Double> decodedTrigramToFrequencyMap = new HashMap<>(decoded.length());
+    public double getFitness(final String key) {
+        final String decoded = decodeBySubstitution(SUBTASK3_CIPHERED, key);
+        final Map<String, Double> decodedTrigramToFrequencyMap = new HashMap<>(decoded.length());
 
         populateDecodedTrigramMap(decoded, decodedTrigramToFrequencyMap);
 
-        fitness = decodedTrigramToFrequencyMap.entrySet().stream()
+        return decodedTrigramToFrequencyMap.entrySet().stream()
                 .filter(entry -> ENG_TRIGRAM_FREQUENCY_MAP.containsKey(entry.getKey()))
                 .mapToDouble(entry -> {
-                    Double frequencyInConstant = ENG_TRIGRAM_FREQUENCY_MAP.get(entry.getKey());
-                    Double frequencyInDecoded = entry.getValue();
-
+                    final Double frequencyInConstant = ENG_TRIGRAM_FREQUENCY_MAP.get(entry.getKey());
+                    final Double frequencyInDecoded = entry.getValue();
                     return frequencyInDecoded * (Math.log10(frequencyInConstant) / Math.log10(2.0d));
                 })
                 .sum();
-
-        return fitness;
     }
 
-    private void populateDecodedTrigramMap(String decoded, Map<String, Double> decodedTrigramMap) {
-        Map<String, Integer> trigramToCountMap = new HashMap<>();
+    private void populateDecodedTrigramMap(final String decoded, final Map<String, Double> decodedTrigramMap) {
+        final Map<String, Integer> trigramToCountMap = new HashMap<>();
         IntStream.range(0, decoded.length() - 3)
                 .mapToObj(i -> decoded.substring(i, i + 3))
                 .forEach(trigram -> {
                     if (trigramToCountMap.containsKey(trigram)) {
-                        Integer count = trigramToCountMap.get(trigram);
+                        final Integer count = trigramToCountMap.get(trigram);
                         trigramToCountMap.put(trigram, count + 1);
                     } else {
                         trigramToCountMap.put(trigram, 1);
@@ -103,12 +93,12 @@ public class GeneticAlgorithmProcess extends Thread {
         trigramToCountMap.forEach((key, value) -> decodedTrigramMap.put(key, value / (double) (decoded.length() - 2)));
     }
 
-    private Individual crossover(Individual father, Individual mother) {
-        Individual offspring = Individual.empty();
+    private Individual crossover(final Individual father, final Individual mother) {
+        final Individual offspring = Individual.empty();
 
         IntStream.range(0, ALPHABET.length())
                 .forEach(index -> {
-                    List<Character> offspringKey = offspring.getKey();
+                    final List<Character> offspringKey = offspring.getKey();
                     Character characterToAdd;
                     if (Math.random() <= CROSSOVER) {
                         characterToAdd = father.getKey().get(index);
@@ -124,7 +114,7 @@ public class GeneticAlgorithmProcess extends Thread {
         getAlphabetCharList().stream()
                 .filter(character -> !offspring.getKey().contains(character))
                 .forEach(character -> {
-                    List<Integer> emptyPositions = IntStream.range(0, ALPHABET.length())
+                    final List<Integer> emptyPositions = IntStream.range(0, ALPHABET.length())
                             .filter(index -> offspring.getKey().get(index).equals(' '))
                             .boxed()
                             .collect(Collectors.toList());
@@ -138,7 +128,7 @@ public class GeneticAlgorithmProcess extends Thread {
 
     private void performMutation(final Individual child) {
 
-        List<Character> key = child.getKey();
+        final List<Character> key = child.getKey();
 
         IntStream.range(0, ALPHABET.length())
                 .forEach(index -> {
@@ -148,24 +138,24 @@ public class GeneticAlgorithmProcess extends Thread {
                 });
     }
 
-    private void swapChars(List<Character> key) {
+    private void swapChars(final List<Character> key) {
         final int firstPosition = (int) (Math.random() * ALPHABET.length());
         final int secondPosition = (int) (Math.random() * ALPHABET.length());
 
-        char temp = key.get(firstPosition);
+        final char temp = key.get(firstPosition);
         key.set(firstPosition, key.get(secondPosition));
         key.set(secondPosition, temp);
     }
 
-    private Individual selectionTournament(Population populationToProcess) {
-        Population selection = Population.empty();
+    private Individual selectionTournament(final Population populationToProcess) {
+        final Population selection = Population.empty();
         populateSelection(populationToProcess, selection, TOURNAMENT_SELECTION_SIZE);
 
         return getFittestFromPopulation(selection);
     }
 
-    private String decodeBySubstitution(String cipher, String key) {
-        Map<Character, Character> alphabetCharacterToKeyCharacterMap = new HashMap<>();
+    private String decodeBySubstitution(final String cipher, final String key) {
+        final Map<Character, Character> alphabetCharacterToKeyCharacterMap = new HashMap<>();
         populateAlphabetCharacterToKeyCharacterMap(ALPHABET.toUpperCase(), key, alphabetCharacterToKeyCharacterMap);
 
         return Arrays.stream(cipher.split(""))
@@ -180,37 +170,40 @@ public class GeneticAlgorithmProcess extends Thread {
         final List<List<Character>> randomKeys = new ArrayList<>();
         populateRandomKeys(randomKeys);
 
-        List<Individual> individuals = randomKeys.stream()
+        final List<Individual> individuals = randomKeys.stream()
                 .map(characters -> {
-                    String key = characters.stream().map(String::valueOf).collect(Collectors.joining());
+                    final String key = characters.stream().map(String::valueOf).collect(Collectors.joining());
                     return new Individual(characters, getFitness(key));
                 }).collect(Collectors.toList());
 
         return new Population(individuals);
     }
 
-    private void populateAlphabetCharacterToKeyCharacterMap(String alphabet, String key,
-                                                            Map<Character, Character> alphabetCharacterToKeyCharacterMap) {
+    private void populateAlphabetCharacterToKeyCharacterMap(final String alphabet,
+                                                            final String key,
+                                                            final Map<Character, Character> alphabetCharacterToKeyCharacterMap) {
         for (int i = 0; i < alphabet.length(); i++) {
             alphabetCharacterToKeyCharacterMap.put(alphabet.charAt(i), key.charAt(i));
         }
     }
 
-    private void populateSelection(Population populationToProcess, Population selection, int sizeOfSelection) {
+    private void populateSelection(final Population populationToProcess,
+                                   final Population selection,
+                                   final int sizeOfSelection) {
         for (int i = 0; i < sizeOfSelection; i++) {
-            int randomId = (int) (Math.random() * populationToProcess.getIndividuals().size());
+            final int randomId = (int) (Math.random() * populationToProcess.getIndividuals().size());
             selection.addIndividual(populationToProcess.getIndividuals().get(randomId));
         }
     }
 
-    private Individual getFittestFromPopulation(Population population) {
+    private Individual getFittestFromPopulation(final Population population) {
         return population.getIndividuals().stream()
                 .max(Comparator.comparingDouble(Individual::getFitness))
                 .orElseThrow();
     }
 
-    private void populateRandomKeys(List<List<Character>> randomKeys) {
-        List<Character> alphabet = getAlphabetCharList();
+    private void populateRandomKeys(final List<List<Character>> randomKeys) {
+        final List<Character> alphabet = getAlphabetCharList();
 
         for (int i = 0; i < alphabet.size(); ) {
             Collections.shuffle(alphabet);
@@ -229,21 +222,8 @@ public class GeneticAlgorithmProcess extends Thread {
                 .collect(Collectors.toList());
     }
 
-
-    public String getCiphered() {
-        return ciphered;
-    }
-
-    public void setCiphered(String ciphered) {
-        this.ciphered = ciphered;
-    }
-
     public String getResult() {
         return result;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
     }
 
     public String getKey() {

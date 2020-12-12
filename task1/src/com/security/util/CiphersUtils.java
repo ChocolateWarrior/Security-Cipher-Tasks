@@ -11,7 +11,7 @@ import java.util.Map;
 
 public final class CiphersUtils {
 
-    public static final Map<String, Double> ENG_TRIGRAM_FREQUENCY_MAP = getTrigrams();
+    public static final Map<String, Double> ENG_TRIGRAM_FREQUENCY_MAP = getNgrams(3);
 
     public static String readFromFile(final String path) {
         String data = "";
@@ -23,11 +23,11 @@ public final class CiphersUtils {
         return data;
     }
 
-    public static double getTotal() {
+    public static double getTotal(final String filename, final int parseCount) {
         double total = 0d;
-        try (BufferedInputStream ignored = new BufferedInputStream(new FileInputStream("resources/english_trigrams.txt"))) {
-            total = Files.lines(Path.of("resources/english_trigrams.txt"))
-                    .map(s -> Double.parseDouble(s.substring(4)))
+        try (BufferedInputStream ignored = new BufferedInputStream(new FileInputStream(filename))) {
+            total = Files.lines(Path.of(filename))
+                    .map(s -> Double.parseDouble(s.substring(parseCount)))
                     .mapToDouble(frequency -> frequency)
                     .sum();
         } catch (IOException e) {
@@ -36,19 +36,19 @@ public final class CiphersUtils {
         return total;
     }
 
-    private static Map<String, Double> getTrigrams() {
-        Map<String, Double> trigrams = new HashMap<>();
-        double total = getTotal();
+    private static Map<String, Double> getNgrams(final int n) {
+        final Map<String, Double> ngrams = new HashMap<>();
+        final double total = getTotal("resources/english_trigrams.txt", n + 1);
         try (BufferedInputStream ignored = new BufferedInputStream(new FileInputStream("resources/english_trigrams.txt"))) {
             Files.lines(Path.of("resources/english_trigrams.txt"))
                     .forEach(s -> {
-                        String trigram = s.substring(0, 3);
-                        double frequency = Double.parseDouble(s.substring(4)) / total;
-                        trigrams.put(trigram, frequency);
+                        String ngram = s.substring(0, n);
+                        double frequency = Double.parseDouble(s.substring(n + 1)) / total;
+                        ngrams.put(ngram, frequency);
                     });
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return trigrams;
+        return ngrams;
     }
 }

@@ -23,9 +23,9 @@ public class SubstitutionExampleCommand implements ExampleCommand {
     }
 
     private String decipher() throws InterruptedException {
-        StringBuffer deciphered = new StringBuffer();
+        final StringBuffer deciphered = new StringBuffer();
 
-        List<GeneticAlgorithmProcess> processes = createThreads();
+        final List<GeneticAlgorithmProcess> processes = createThreads();
 
         processes.forEach(Thread::start);
         Thread.sleep(6000);
@@ -42,7 +42,4 @@ public class SubstitutionExampleCommand implements ExampleCommand {
                 .mapToObj(x -> new GeneticAlgorithmProcess())
                 .collect(Collectors.toList());
     }
-
-
-
 }
