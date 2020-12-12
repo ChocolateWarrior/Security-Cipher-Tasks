@@ -1,4 +1,4 @@
-package com.security.util;
+package com.security.utils;
 
 
 public interface ExampleCommand {
