@@ -21,11 +21,10 @@ public class DecipherCaesarXorExampleCommand implements ExampleCommand {
         decipherXorCaesar(SUBTASK1_CIPHERED);
     }
 
-    private void decipherXorCaesar(String ciphered) {
-        String deciphered = "";
-        List<Character> charList = getChars(ciphered);
+    private void decipherXorCaesar(final String ciphered) {
+        final List<Character> charList = getChars(ciphered);
 
-        List<String> variants = new ArrayList<>();
+        final List<String> variants = new ArrayList<>();
 
         for (byte xorCount = Byte.MIN_VALUE; xorCount < Byte.MAX_VALUE; xorCount++) {
             variants.add(xorEach(charList, xorCount));
@@ -36,15 +35,14 @@ public class DecipherCaesarXorExampleCommand implements ExampleCommand {
         System.out.println(TASK_2);
     }
 
-    private List<Character> getChars(String ciphered) {
+    private List<Character> getChars(final String ciphered) {
         return Arrays.stream(ciphered.split(""))
                 .map(x -> x.charAt(0))
                 .collect(Collectors.toList());
     }
 
-    //влоб
-    private String xorEach(List<Character> ciphered, byte xorCount){
-        StringBuilder res = new StringBuilder();
+    private String xorEach(final List<Character> ciphered, final byte xorCount){
+        final StringBuilder res = new StringBuilder();
         for(Character c : ciphered) {
             res.append((char) (c ^ xorCount));
         }

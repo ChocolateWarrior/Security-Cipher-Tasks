@@ -9,7 +9,7 @@ public interface Constants {
     String ANSI_PURPLE = "\u001B[35m";
 
     int THREAD_POOL_SIZE = 4;
-    int POPULATION_SIZE = 500;
+    int POPULATION_SIZE = 120;
     int MAX_GENERATION_SIZE = 50;
     int TOURNAMENT_SELECTION_SIZE = 100;
     double CROSSOVER = 0.5;

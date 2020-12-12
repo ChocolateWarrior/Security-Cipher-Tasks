@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.security.util.CiphersUtils.ENG_QUADGRAM_FREQUENCY_MAP;
 import static com.security.util.CiphersUtils.ENG_TRIGRAM_FREQUENCY_MAP;
 import static com.security.util.Constants.*;
 
@@ -43,7 +44,7 @@ public class GeneticAlgorithmProcess extends Thread {
             final Individual offspring = crossover(father, mother);
             performMutation(offspring);
 
-            offspring.setFitness(getFitness(offspring.getKey().stream()
+            offspring.setFitness(getFitnessTotal(offspring.getKey().stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining())));
 
@@ -61,36 +62,44 @@ public class GeneticAlgorithmProcess extends Thread {
         return 0;
     }
 
-    public double getFitness(final String key) {
+    private double getFitnessTotal(final String key) {
+        return getFitnessNgram(key, ENG_TRIGRAM_FREQUENCY_MAP, 3)
+                + getFitnessNgram(key, ENG_QUADGRAM_FREQUENCY_MAP, 4);
+    }
+
+
+    private double getFitnessNgram(final String key, final Map<String, Double> frequencyMap, final int n) {
         final String decoded = decodeBySubstitution(SUBTASK3_CIPHERED, key);
-        final Map<String, Double> decodedTrigramToFrequencyMap = new HashMap<>(decoded.length());
+        final Map<String, Double> decodedNgramToFrequencyMap = new HashMap<>(decoded.length());
 
-        populateDecodedTrigramMap(decoded, decodedTrigramToFrequencyMap);
+        populateDecodedMap(decoded, decodedNgramToFrequencyMap, n);
 
-        return decodedTrigramToFrequencyMap.entrySet().stream()
-                .filter(entry -> ENG_TRIGRAM_FREQUENCY_MAP.containsKey(entry.getKey()))
+        return decodedNgramToFrequencyMap.entrySet().stream()
+                .filter(entry -> frequencyMap.containsKey(entry.getKey()))
                 .mapToDouble(entry -> {
-                    final Double frequencyInConstant = ENG_TRIGRAM_FREQUENCY_MAP.get(entry.getKey());
+                    final Double frequencyInConstant = frequencyMap.get(entry.getKey());
                     final Double frequencyInDecoded = entry.getValue();
                     return frequencyInDecoded * (Math.log10(frequencyInConstant) / Math.log10(2.0d));
                 })
                 .sum();
     }
 
-    private void populateDecodedTrigramMap(final String decoded, final Map<String, Double> decodedTrigramMap) {
+    private void populateDecodedMap(final String decoded,
+                                    final Map<String, Double> decodedTrigramMap,
+                                    final int n) {
         final Map<String, Integer> trigramToCountMap = new HashMap<>();
-        IntStream.range(0, decoded.length() - 3)
-                .mapToObj(i -> decoded.substring(i, i + 3))
-                .forEach(trigram -> {
-                    if (trigramToCountMap.containsKey(trigram)) {
-                        final Integer count = trigramToCountMap.get(trigram);
-                        trigramToCountMap.put(trigram, count + 1);
+        IntStream.range(0, decoded.length() - n)
+                .mapToObj(i -> decoded.substring(i, i + n))
+                .forEach(ngram -> {
+                    if (trigramToCountMap.containsKey(ngram)) {
+                        final Integer count = trigramToCountMap.get(ngram);
+                        trigramToCountMap.put(ngram, count + 1);
                     } else {
-                        trigramToCountMap.put(trigram, 1);
+                        trigramToCountMap.put(ngram, 1);
                     }
                 });
 
-        trigramToCountMap.forEach((key, value) -> decodedTrigramMap.put(key, value / (double) (decoded.length() - 2)));
+        trigramToCountMap.forEach((key, value) -> decodedTrigramMap.put(key, value / (double) (decoded.length() - (n - 1))));
     }
 
     private Individual crossover(final Individual father, final Individual mother) {
@@ -173,7 +182,7 @@ public class GeneticAlgorithmProcess extends Thread {
         final List<Individual> individuals = randomKeys.stream()
                 .map(characters -> {
                     final String key = characters.stream().map(String::valueOf).collect(Collectors.joining());
-                    return new Individual(characters, getFitness(key));
+                    return new Individual(characters, getFitnessTotal(key));
                 }).collect(Collectors.toList());
 
         return new Population(individuals);
