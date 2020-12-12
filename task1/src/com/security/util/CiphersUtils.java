@@ -18,6 +18,7 @@ public final class CiphersUtils {
 
     public static final Map<String, Double> ENG_TRIGRAM_FREQUENCY_MAP = getNgrams(3, "resources/english_trigrams.txt");
     public static final Map<String, Double> ENG_BIGRAM_FREQUENCY_MAP = getNgrams(2, "resources/english_bigrams.txt");
+    public static final Map<String, Double> ENG_QUADGRAM_FREQUENCY_MAP = getNgrams(2, "resources/english_bigrams.txt");
     public static final Map<String, Double> ENG_MONOGRAM_FREQUENCY_MAP = getMonoGrams();
 
     public static String readFromFile(final String path) {

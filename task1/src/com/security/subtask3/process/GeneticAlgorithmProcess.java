@@ -21,7 +21,7 @@ public class GeneticAlgorithmProcess extends Thread {
         Population population = getInitialPopulation();
         System.out.println(population);
 
-        for (int i = 0; i < MAX_GENERATION_SIZE; i++) {
+        for (int i = 0; i < MAX_GENERATION_SIZE_SUBTASK3; i++) {
             Individual fittest = getFittestFromPopulation(population);
             System.out.println(" Generation: " + i);
             System.out.println(" Fitness: " + fittest.getFitness() + " , Key: " + fittest.getKey());
