@@ -3,7 +3,7 @@ package com.security;
 import com.security.lcg.command.LcgCrackerCommand;
 import com.security.mt1.command.MtCrackerCommand;
 import com.security.mt2.command.Mt2CrackerCommand;
-import com.security.util.ExampleCommand;
+import com.security.utils.ExampleCommand;
 
 public class Lab2Main {
 

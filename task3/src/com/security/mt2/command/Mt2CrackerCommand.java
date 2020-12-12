@@ -1,16 +1,22 @@
 package com.security.mt2.command;
 
-import com.security.util.ExampleCommand;
 import com.security.utils.Bet;
 import com.security.utils.Client;
+import com.security.utils.ExampleCommand;
 import org.apache.commons.math3.random.MersenneTwister;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
 
+import static com.security.utils.UntemperingUtils.unTemp;
+
 public class Mt2CrackerCommand implements ExampleCommand {
     private static final String PLAYER_ID = "PlayerHardMT";
     private static final String MODE = "BetterMt";
+    public static final int STATES_AMOUNT = 624;
+    public static final int INTEGER_ONE = 1;
+    public static final int INTEGER_32 = 32;
+    public static final String MT = "mt";
 
     @Override
     public void execute() throws Exception {
@@ -41,7 +47,7 @@ public class Mt2CrackerCommand implements ExampleCommand {
     private void setState(final int[] serverState, final MersenneTwister serverGenerator) {
         try {
             final Field state = serverGenerator.getClass()
-                    .getDeclaredField("mt");
+                    .getDeclaredField(MT);
             state.setAccessible(true);
 
             state.set(serverGenerator, serverState);
@@ -51,41 +57,14 @@ public class Mt2CrackerCommand implements ExampleCommand {
     }
 
     private int[] getState() throws Exception {
-        final int[] serverState = new int[624];
+        final int[] serverState = new int[STATES_AMOUNT];
 
-        for (int i = 0; i < 624; i++) {
-            final Bet bet = Client.createBet(MODE, PLAYER_ID, 1, 1).get();
+        for (int i = 0; i < STATES_AMOUNT; i++) {
+            final Bet bet = Client.createBet(MODE, PLAYER_ID, INTEGER_ONE, INTEGER_ONE).get();
             serverState[i] = unTemp((int) bet.getRealNumber());
         }
         return serverState;
     }
 
-    //    tempering
-    //    y ^=  y >>> 11;
-    //    y ^= (y <<   7) & 0x9d2c5680;
-    //    y ^= (y <<  15) & 0xefc60000;
-    //    y ^=  y >>> 18;
-    private int unTemp(int x) {
-        x = unshiftRight(x, 18);
-        x = unshiftLeft(x, 15, 0xefc60000);
-        x = unshiftLeft(x, 7, 0x9d2c5680);
-        x = unshiftRight(x, 11);
-        return x;
-    }
 
-    private int unshiftRight(int x, int shift) {
-        int res = x;
-        for (int i = 0; i < 32; i++) {
-            res = x ^ res >>> shift;
-        }
-        return res;
-    }
-
-    private int unshiftLeft(int x, int shift, int mask) {
-        int res = x;
-        for (int i = 0; i < 32; i++) {
-            res = x ^ (res << shift & mask);
-        }
-        return res;
-    }
 }
